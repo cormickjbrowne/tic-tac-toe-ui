@@ -1,0 +1,18 @@
+.pieceContainer {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.isHidden {
+  opacity: 0;
+  stroke: lightgrey;
+  fill: lightgrey;
+  transition-property: opacity;
+  transition-duration: .04s;
+
+  &:hover {
+    opacity: 100;
+    cursor: pointer;
+  }
+}

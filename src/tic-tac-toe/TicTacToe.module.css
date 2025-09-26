@@ -1,0 +1,33 @@
+table {
+  border-spacing: 0;
+  border: none;
+}
+.cell {
+  padding: 10%;
+  z-index: 2;
+}
+
+.container {
+  width: 600px;
+  height: 600px;
+  max-width: 940px;
+  max-height: 940px;
+  position: relative;
+}
+
+.boardContainer {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  z-index: 1;
+}
+
+.table {
+  position: absolute;
+  top: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+}
