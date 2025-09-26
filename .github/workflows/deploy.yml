@@ -1,0 +1,50 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main  # or your deployment branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Activate Service Account for gcloud CLI
+        run: |
+          echo '${{ secrets.GCP_SA_KEY }}' > /tmp/key.json
+          gcloud auth activate-service-account --key-file=/tmp/key.json
+          gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Authenticate Docker to Artifact Registry
+        run: |
+          echo '${{ secrets.GCP_SA_KEY }}' | docker login -u _json_key --password-stdin us-east1-docker.pkg.dev
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker us-east1-docker.pkg.dev --quiet
+
+      - name: Build and Push Docker image
+        run: |
+          IMAGE="us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-docker-repo/tic-tac-toe-ui:${{ github.sha }}"
+          docker build -t $IMAGE .
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy tic-tac-toe-ui \
+            --image $IMAGE \
+            --region us-east1 \
+            --platform managed \
+            --allow-unauthenticated
